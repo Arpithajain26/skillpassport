@@ -3,26 +3,26 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────────── */
 :root {
-  --bg-base: #07070f;
-  --bg-surface: #0f0f1a;
-  --bg-card: #13131f;
-  --bg-card-hover: #191928;
-  --bg-glass: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(139, 92, 246, 0.6);
+  --bg-base: #060b17;
+  --bg-surface: #0b1329;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-card-hover: rgba(30, 41, 59, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(56, 189, 248, 0.7);
 
-  --primary: #8b5cf6;
-  --primary-light: #a78bfa;
-  --primary-glow: rgba(139, 92, 246, 0.4);
-  --violet: #a855f7;
-  --cyan: #06b6d4;
-  --emerald: #10b981;
-  --amber: #f59e0b;
-  --rose: #f43f5e;
+  --primary: #38bdf8;
+  --primary-light: #7dd3fc;
+  --primary-glow: rgba(56, 189, 248, 0.35);
+  --violet: #60a5fa;
+  --cyan: #22d3ee;
+  --emerald: #34d399;
+  --amber: #fbbf24;
+  --rose: #fb7185;
 
-  --text-primary: #f0f0ff;
-  --text-secondary: #9394a5;
-  --text-muted: #5c5d6e;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
   --sidebar-width: 240px;
   --header-h: 64px;
@@ -48,21 +48,21 @@ body {
 /* ─── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-surface); }
-::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.7); }
+::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.7); }
 
 /* ─── Gradients ──────────────────────────────────────────────────── */
 .gradient-primary {
-  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #06b6d4 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #60a5fa 100%);
 }
 .gradient-text {
-  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #22d3ee 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 40%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-glow {
-  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
 }
 
 /* ─── Glass Card ─────────────────────────────────────────────────── */
@@ -73,8 +73,8 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .card:hover {
-  border-color: rgba(99,102,241,0.25);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.15);
 }
 .card-glass {
   background: var(--bg-glass);
@@ -100,13 +100,13 @@ body {
   white-space: nowrap;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
   color: #fff;
-  box-shadow: 0 0 0 0 var(--primary-glow);
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(168,85,247,0.45);
+  box-shadow: 0 8px 28px rgba(56, 189, 248, 0.5);
 }
 .btn-primary:active { transform: translateY(0); }
 .btn-secondary {

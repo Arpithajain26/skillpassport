@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "skillpassport-production-secret-key-998877665544332211",
   trustHost: true,
   session: { strategy: "jwt" },
   pages: {
