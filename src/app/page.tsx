@@ -759,11 +759,11 @@ export default function LandingPage() {
             return (
               <motion.div
                 key={f.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40, y: 20 }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.6, delay: i * 0.08 }}
+                whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2 } }}
                 style={{
                   background: "rgba(19,19,31,0.6)",
                   borderRadius: 16,
@@ -845,6 +845,45 @@ export default function LandingPage() {
             </Link>
           </motion.div>
         </div>
+      </section>
+
+      {/* ── SLIDING TECH MARQUEE TICKER ── */}
+      <section style={{ overflow: "hidden", padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(12,12,25,0.6)", position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 10px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#818cf8", textTransform: "uppercase" }}>
+          ⚡ Deep Skill Verification Engine Supported Stack
+        </div>
+        <motion.div
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+          style={{ display: "flex", gap: 20, width: "max-content" }}
+        >
+          {[
+            "React.js", "Next.js 15", "Python", "FastAPI", "TensorFlow", "PyTorch", "Docker", "Kubernetes",
+            "PostgreSQL", "MongoDB Atlas", "AWS Cloud", "GraphQL", "TypeScript", "Tailwind CSS", "Node.js", "System Design",
+            "React.js", "Next.js 15", "Python", "FastAPI", "TensorFlow", "PyTorch", "Docker", "Kubernetes",
+            "PostgreSQL", "MongoDB Atlas", "AWS Cloud", "GraphQL", "TypeScript", "Tailwind CSS", "Node.js", "System Design",
+          ].map((tech, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 20px",
+                borderRadius: 99,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#e0e7ff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Sparkles size={13} color="#818cf8" />
+              {tech}
+            </div>
+          ))}
+        </motion.div>
       </section>
 
       {/* ── FOOTER ── */}
