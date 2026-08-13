@@ -7,20 +7,36 @@ import { DashboardHomeClient } from "./client";
 export const metadata = { title: "Dashboard" };
 
 async function getDashboardData(userId: string) {
-  const [user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId } }),
-    prisma.userSkill.findMany({ where: { userId }, include: { skill: true }, orderBy: { confidenceScore: "desc" }, take: 8 }),
-    prisma.evidence.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 5 }),
-    prisma.project.count({ where: { userId } }),
-    prisma.certificate.count({ where: { userId } }),
-    prisma.careerGoal.findMany({ where: { userId, isActive: true }, take: 2 }),
-    prisma.skillGap.findMany({ where: { userId }, orderBy: { gapScore: "desc" }, take: 5 }),
-    prisma.assessment.findMany({ where: { userId }, orderBy: { completedAt: "desc" }, take: 3 }),
-    prisma.aiProfileSummary.findUnique({ where: { userId } }),
-    prisma.gitHubRepo.count({ where: { userId } }),
-  ]);
+  try {
+    const [user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.userSkill.findMany({ where: { userId }, include: { skill: true }, orderBy: { confidenceScore: "desc" }, take: 8 }),
+      prisma.evidence.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 5 }),
+      prisma.project.count({ where: { userId } }),
+      prisma.certificate.count({ where: { userId } }),
+      prisma.careerGoal.findMany({ where: { userId, isActive: true }, take: 2 }),
+      prisma.skillGap.findMany({ where: { userId }, orderBy: { gapScore: "desc" }, take: 5 }),
+      prisma.assessment.findMany({ where: { userId }, orderBy: { completedAt: "desc" }, take: 3 }),
+      prisma.aiProfileSummary.findUnique({ where: { userId } }),
+      prisma.gitHubRepo.count({ where: { userId } }),
+    ]);
 
-  return { user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos };
+    return { user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos };
+  } catch (error) {
+    console.error("Dashboard fetch error:", error);
+    return {
+      user: null,
+      skills: [],
+      evidence: [],
+      projects: 0,
+      certificates: 0,
+      careerGoals: [],
+      skillGaps: [],
+      assessments: [],
+      aiSummary: null,
+      githubRepos: 0,
+    };
+  }
 }
 
 export default async function DashboardPage() {
