@@ -21,7 +21,11 @@ export default function LoginPage() {
     try {
       const res = await signInWithGoogleFirebase();
       if (!res.success || !res.user) {
-        setError(res.error || "Google Sign-In failed. Please try again.");
+        let msg = res.error || "Google Sign-In failed.";
+        if (msg.includes("unauthorized-domain")) {
+          msg = "Domain unauthorized in Firebase. Please add your Vercel URL in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+        }
+        setError(msg);
         setGoogleLoading(false);
         return;
       }
