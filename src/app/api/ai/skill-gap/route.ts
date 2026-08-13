@@ -8,10 +8,11 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const userId = session.user.id;
     const { targetRole } = await req.json();
 
     const userSkills = await prisma.userSkill.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       include: { skill: true },
     });
 
@@ -25,13 +26,13 @@ export async function POST(req: NextRequest) {
 
     // Store gaps in database
     await prisma.skillGap.deleteMany({
-      where: { userId: session.user.id, targetRole },
+      where: { userId, targetRole },
     });
 
     if (result.gaps && result.gaps.length > 0) {
       await prisma.skillGap.createMany({
         data: result.gaps.map((g: any) => ({
-          userId: session.user.id,
+          userId,
           skill: g.skill,
           currentLevel: g.current_level,
           requiredLevel: g.required_level,

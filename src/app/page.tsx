@@ -15,7 +15,6 @@ import {
   Award,
   Zap,
   BarChart3,
-  Github,
   ChevronRight,
   TrendingUp,
   FileCheck,

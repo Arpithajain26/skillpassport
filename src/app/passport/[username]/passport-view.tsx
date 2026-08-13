@@ -132,7 +132,7 @@ export function PassportView({ user }: { user: any }) {
           {/* Skills Grid */}
           {skills.length > 0 && (
             <div style={{ padding: "24px 32px" }}>
-              <h2 style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: 12 }}>
+              <h2 style={{ fontWeight: 700, marginBottom: 16, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: 12 }}>
                 Verified Skills
               </h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
