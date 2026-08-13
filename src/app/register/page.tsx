@@ -329,20 +329,6 @@ export default function RegisterPage() {
             Continue with Google (Firebase)
           </button>
 
-          <hr className="divider" style={{ margin: "20px 0" }} />
-
-          {/* Quick Demo Register Button */}
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>Instant Demo Access:</p>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ width: "100%", justifyContent: "center", fontSize: 13, padding: "10px", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)" }}
-            onClick={handleDemoRegister}
-            disabled={loading}
-          >
-            ⚡ 1-Click Demo Register (Arpitha Jain)
-          </button>
-
           <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--text-muted)" }}>
             By registering you agree to our Terms of Service and Privacy Policy.
           </p>

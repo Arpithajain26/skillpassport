@@ -356,111 +356,114 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Right Column (Hero Video & Interactive Showcase) */}
+          {/* Right Column (Prominent Hero Image with Glowing Animations & Badges) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
+            initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             style={{ display: "flex", justifyContent: "center", position: "relative" }}
           >
-            {/* Ambient Background Glow for Hero Media */}
-            <div
+            {/* Pulsing Ambient Background Glow */}
+            <motion.div
+              animate={{
+                scale: [1, 1.15, 1],
+                opacity: [0.35, 0.55, 0.35],
+              }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               style={{
                 position: "absolute",
-                width: "90%",
-                height: "90%",
-                background: "radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(34,211,238,0.15) 50%, transparent 75%)",
-                filter: "blur(50px)",
+                width: "95%",
+                height: "95%",
+                background: "radial-gradient(circle, rgba(168,85,247,0.35) 0%, rgba(99,102,241,0.2) 50%, transparent 75%)",
+                filter: "blur(60px)",
                 zIndex: 0,
               }}
             />
 
-            {/* Video Background / Interactive Media Frame */}
+            {/* Floating Main Image Frame */}
             <motion.div
               animate={{
-                y: [0, -12, 0],
+                y: [0, -18, 0],
+                rotate: [0, 1, 0, -1, 0],
               }}
               transition={{
-                duration: 6,
+                duration: 5,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.03 }}
               style={{
                 position: "relative",
                 zIndex: 1,
-                borderRadius: 24,
+                borderRadius: 28,
                 overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.15)",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.7), 0 0 40px rgba(99,102,241,0.25)",
-                background: "#0d0d1a",
+                border: "2px solid rgba(168,85,247,0.35)",
+                boxShadow: "0 28px 70px rgba(0,0,0,0.8), 0 0 50px rgba(168,85,247,0.3)",
+                background: "rgba(15,15,26,0.9)",
+                maxWidth: 440,
                 width: "100%",
-                maxWidth: 460,
+                aspectRatio: "1/1",
               }}
             >
-              {/* Media Header */}
-              <div
+              <img
+                src="/logo.jpg"
+                alt="SkillPassport - AI Powered Concept Licence"
                 style={{
-                  background: "rgba(15,15,26,0.95)",
-                  padding: "12px 18px",
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+
+              {/* Floating Live Badge 1 */}
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  left: 20,
+                  background: "rgba(13,13,26,0.85)",
+                  border: "1px solid rgba(168,85,247,0.4)",
+                  backdropFilter: "blur(12px)",
+                  padding: "8px 14px",
+                  borderRadius: 12,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  gap: 8,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#eab308" }} />
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
-                  <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: "#818cf8", fontFamily: "monospace" }}>
-                    AI-VERIFICATION-LIVE-DEMO.mp4
-                  </span>
-                </div>
-                <span style={{ fontSize: 10, background: "rgba(16,185,129,0.2)", color: "#10b981", padding: "2px 8px", borderRadius: 99, fontWeight: 700 }}>
-                  LIVE
-                </span>
-              </div>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff" }}>AI Verified Passport</span>
+              </motion.div>
 
-              {/* Video Stream Element */}
-              <div style={{ position: "relative", width: "100%", aspectRatio: "16/10", overflow: "hidden" }}>
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    filter: "brightness(0.85) contrast(1.1)",
-                  }}
-                  src="https://cdn.pixabay.com/video/2021/04/12/70881-536545754_large.mp4"
-                />
-                
-                {/* Gradient Overlay with Logo & Badges */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(to top, rgba(13,13,26,0.95) 0%, transparent 60%)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    padding: 20,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", overflow: "hidden", border: "2px solid #6366f1" }}>
-                      <img src="/logo.jpg" alt="SkillPassport Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: "#ffffff" }}>SkillPassport Engine</div>
-                      <div style={{ fontSize: 11, color: "#a78bfa" }}>Autonomous Concept Licensing v2.4</div>
-                    </div>
-                  </div>
+              {/* Floating Live Badge 2 */}
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                style={{
+                  position: "absolute",
+                  bottom: 20,
+                  right: 20,
+                  background: "rgba(13,13,26,0.85)",
+                  border: "1px solid rgba(34,211,238,0.4)",
+                  backdropFilter: "blur(12px)",
+                  padding: "10px 16px",
+                  borderRadius: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+                }}
+              >
+                <Sparkles size={16} color="#06b6d4" />
+                <div>
+                  <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 600 }}>Confidence Score</div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: "#22d3ee" }}>98.4% Match</div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
 

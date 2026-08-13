@@ -27,7 +27,7 @@ export async function signInWithGoogleFirebase() {
       },
     };
   } catch (error: any) {
-    console.warn("Firebase direct popup error or unconfigured API keys, falling back to simulated modal:", error);
-    return { success: false, error: error.message };
+    console.warn("Firebase popup authorization notice (fallback activated):", error?.message || error);
+    return { success: false, fallback: true, error: error?.message };
   }
 }

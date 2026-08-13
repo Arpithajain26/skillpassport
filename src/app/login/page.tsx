@@ -272,32 +272,6 @@ export default function LoginPage() {
             Continue with Google (Firebase)
           </button>
 
-          <hr className="divider" style={{ margin: "20px 0" }} />
-
-          {/* Demo quick login */}
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>Instant Demo Access:</p>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ width: "100%", justifyContent: "center", fontSize: 13, padding: "10px", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)" }}
-            onClick={async () => {
-              setEmail("alex@example.com");
-              setPassword("demo1234");
-              setLoading(true);
-              const res = await signIn("credentials", {
-                email: "alex@example.com",
-                password: "demo1234",
-                redirect: false,
-              });
-              if (!res?.error) {
-                router.push("/dashboard");
-                router.refresh();
-              }
-              setLoading(false);
-            }}
-          >
-            ⚡ 1-Click Demo Login (Alex Chen)
-          </button>
         </div>
 
         <p style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: "var(--text-secondary)" }}>
