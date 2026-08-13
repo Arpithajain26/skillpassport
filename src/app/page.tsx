@@ -147,17 +147,18 @@ export default function LandingPage() {
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
             <div
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
-                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "2px solid #6366f1",
+                boxShadow: "0 0 15px rgba(99,102,241,0.4)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 0 20px rgba(99,102,241,0.4)",
               }}
             >
-              <Sparkles size={20} color="#ffffff" />
+              <img src="/logo.jpg" alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.02em", color: "#ffffff" }}>
               Skill<span style={{ background: "linear-gradient(135deg, #818cf8, #22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Passport</span>
@@ -216,140 +217,201 @@ export default function LandingPage() {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section style={{ position: "relative", zIndex: 1, padding: "80px 24px 60px", textAlign: "center" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          {/* Top Floating Pill */}
+      <section style={{ position: "relative", zIndex: 1, padding: "80px 24px 60px", maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 48, alignItems: "center", textAlign: "left" }}>
+          
+          {/* Left Column (Hero copy) */}
+          <div>
+            {/* Top Floating Pill */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{ display: "inline-block", marginBottom: 20 }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 18px",
+                  borderRadius: 99,
+                  background: "rgba(99,102,241,0.12)",
+                  border: "1px solid rgba(99,102,241,0.3)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#818cf8",
+                }}
+              >
+                <Zap size={14} className="text-indigo-400 animate-pulse" />
+                SkillPassport - AI Powered Concept Licence
+              </div>
+            </motion.div>
+
+            {/* Hero Main Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              style={{
+                fontSize: "clamp(38px, 5.5vw, 64px)",
+                fontWeight: 900,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
+                marginBottom: 24,
+                color: "#ffffff"
+              }}
+            >
+              Your Skills.{" "}
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #67e8f9 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                AI Verified.
+              </span>
+              <br />
+              Backed by Real Proof.
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              style={{
+                fontSize: "clamp(15px, 2vw, 18px)",
+                color: "#9394a5",
+                marginBottom: 40,
+                lineHeight: 1.6,
+              }}
+            >
+              Transform scattered GitHub repos, certificates, project code, and AI assessments into a{" "}
+              <span style={{ color: "#f0f0ff", fontWeight: 600 }}>dynamic, tamper-proof Skill Passport</span> that proves what you can actually build.
+            </motion.p>
+
+            {/* Call to Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 28 }}
+            >
+              <Link
+                href="/register"
+                style={{
+                  padding: "16px 36px",
+                  borderRadius: 12,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  color: "#ffffff",
+                  textDecoration: "none",
+                  boxShadow: "0 8px 30px rgba(99,102,241,0.45)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <Sparkles size={18} /> Build Your Free Passport
+              </Link>
+              <Link
+                href="/passport/alex-chen"
+                style={{
+                  padding: "16px 32px",
+                  borderRadius: 12,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "#f0f0ff",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                Live Demo Profile <ChevronRight size={18} />
+              </Link>
+            </motion.div>
+
+            {/* Micro Guarantee Badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", fontSize: 13, color: "#5c5d6e" }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 size={14} color="#10b981" /> No Credit Card Required
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 size={14} color="#10b981" /> Free MongoDB Atlas Backend
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 size={14} color="#10b981" /> Real-Time AI Gap Analysis
+              </span>
+            </motion.div>
+          </div>
+
+          {/* Right Column (Floating Animated Logo Image) */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{ display: "inline-block", marginBottom: 24 }}
+            initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            style={{ display: "flex", justifyContent: "center", position: "relative" }}
           >
+            {/* Ambient Background Glow for Logo */}
             <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 18px",
-                borderRadius: 99,
-                background: "rgba(99,102,241,0.12)",
-                border: "1px solid rgba(99,102,241,0.3)",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#818cf8",
+                position: "absolute",
+                width: "80%",
+                height: "80%",
+                background: "radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)",
+                filter: "blur(40px)",
+                zIndex: 0,
               }}
-            >
-              <Zap size={14} className="text-indigo-400 animate-pulse" />
-              Next-Gen AI Skill Identity Platform
-            </div>
-          </motion.div>
+            />
 
-          {/* Hero Main Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            style={{
-              fontSize: "clamp(42px, 6.5vw, 76px)",
-              fontWeight: 900,
-              lineHeight: 1.08,
-              letterSpacing: "-0.03em",
-              marginBottom: 24,
-            }}
-          >
-            Your Skills.{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #67e8f9 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+            {/* Main Interactive Floating Image Frame */}
+            <motion.div
+              animate={{
+                y: [0, -16, 0],
               }}
-            >
-              AI Verified.
-            </span>
-            <br />
-            Backed by Real Proof.
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            style={{
-              fontSize: "clamp(16px, 2.2vw, 20px)",
-              color: "#9394a5",
-              maxWidth: 680,
-              margin: "0 auto 40px",
-              lineHeight: 1.6,
-            }}
-          >
-            Transform scattered GitHub repos, certificates, project code, and AI assessments into a{" "}
-            <span style={{ color: "#f0f0ff", fontWeight: 600 }}>dynamic, tamper-proof Skill Passport</span> that proves what you can actually build.
-          </motion.p>
-
-          {/* Call to Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}
-          >
-            <Link
-              href="/register"
-              style={{
-                padding: "16px 36px",
-                borderRadius: 12,
-                fontSize: 16,
-                fontWeight: 700,
-                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                color: "#ffffff",
-                textDecoration: "none",
-                boxShadow: "0 8px 30px rgba(99,102,241,0.45)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
               }}
-            >
-              <Sparkles size={18} /> Build Your Free Passport
-            </Link>
-            <Link
-              href="/passport/alex-chen"
+              whileHover={{ scale: 1.03, rotate: 1 }}
               style={{
-                padding: "16px 32px",
-                borderRadius: 12,
-                fontSize: 16,
-                fontWeight: 600,
-                background: "rgba(255,255,255,0.05)",
+                position: "relative",
+                zIndex: 1,
+                borderRadius: 28,
+                overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.12)",
-                color: "#f0f0ff",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
+                boxShadow: "0 24px 60px rgba(0,0,0,0.6), 0 0 30px rgba(99,102,241,0.2)",
+                background: "rgba(19,19,31,0.4)",
+                maxWidth: 420,
+                width: "100%",
+                aspectRatio: "1/1",
               }}
             >
-              Live Demo Profile <ChevronRight size={18} />
-            </Link>
+              <img
+                src="/logo.jpg"
+                alt="SkillPassport Logo"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            </motion.div>
           </motion.div>
 
-          {/* Micro Guarantee Badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            style={{ marginTop: 28, display: "flex", alignItems: "center", justifyContent: "center", gap: 24, flexWrap: "wrap", fontSize: 13, color: "#5c5d6e" }}
-          >
-            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <CheckCircle2 size={14} color="#10b981" /> No Credit Card Required
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <CheckCircle2 size={14} color="#10b981" /> Free MongoDB Atlas Backend
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <CheckCircle2 size={14} color="#10b981" /> Real-Time AI Gap Analysis
-            </span>
-          </motion.div>
         </div>
       </section>
 

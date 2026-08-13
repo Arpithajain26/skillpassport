@@ -15,6 +15,7 @@ const profileSchema = z.object({
   targetCountry: z.string().optional(),
   isPublic: z.boolean().optional(),
   onboardingComplete: z.boolean().optional(),
+  image: z.string().optional(),
 });
 
 export async function GET() {
@@ -65,7 +66,7 @@ export async function PUT(req: NextRequest) {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data,
-      select: { id: true, name: true, email: true, bio: true, location: true, headline: true },
+      select: { id: true, name: true, email: true, bio: true, location: true, headline: true, image: true },
     });
 
     return NextResponse.json(user);

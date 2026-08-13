@@ -3,14 +3,14 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "SkillPassport — AI-Verified Skill Identity",
+    default: "SkillPassport - AI Powered Concept Licence",
     template: "%s | SkillPassport",
   },
   description:
     "SkillPassport transforms scattered evidence — GitHub repos, certificates, projects, assessments — into a dynamic, AI-verified professional identity that goes beyond resumes.",
   keywords: ["skills", "AI", "portfolio", "passport", "career", "verification"],
   openGraph: {
-    title: "SkillPassport",
+    title: "SkillPassport - AI Powered Concept Licence",
     description: "Your AI-Verified Skill Identity",
     type: "website",
   },

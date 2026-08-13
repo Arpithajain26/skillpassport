@@ -43,6 +43,7 @@ export default async function DashboardPage() {
         title={`Good day, ${data.user?.name?.split(" ")[0] ?? "there"} 👋`}
         subtitle="Here's your skill identity snapshot"
         userInitials={initials}
+        userImage={data.user?.image || undefined}
         username={(session.user as any).username}
       />
       <main className="dashboard-content">
