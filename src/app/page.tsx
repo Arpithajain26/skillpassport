@@ -356,59 +356,111 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Right Column (Floating Animated Logo Image) */}
+          {/* Right Column (Hero Video & Interactive Showcase) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+            initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             style={{ display: "flex", justifyContent: "center", position: "relative" }}
           >
-            {/* Ambient Background Glow for Logo */}
+            {/* Ambient Background Glow for Hero Media */}
             <div
               style={{
                 position: "absolute",
-                width: "80%",
-                height: "80%",
-                background: "radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)",
-                filter: "blur(40px)",
+                width: "90%",
+                height: "90%",
+                background: "radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(34,211,238,0.15) 50%, transparent 75%)",
+                filter: "blur(50px)",
                 zIndex: 0,
               }}
             />
 
-            {/* Main Interactive Floating Image Frame */}
+            {/* Video Background / Interactive Media Frame */}
             <motion.div
               animate={{
-                y: [0, -16, 0],
+                y: [0, -12, 0],
               }}
               transition={{
-                duration: 5,
+                duration: 6,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              whileHover={{ scale: 1.03, rotate: 1 }}
+              whileHover={{ scale: 1.02 }}
               style={{
                 position: "relative",
                 zIndex: 1,
-                borderRadius: 28,
+                borderRadius: 24,
                 overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.12)",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.6), 0 0 30px rgba(99,102,241,0.2)",
-                background: "rgba(19,19,31,0.4)",
-                maxWidth: 420,
+                border: "1px solid rgba(255,255,255,0.15)",
+                boxShadow: "0 24px 60px rgba(0,0,0,0.7), 0 0 40px rgba(99,102,241,0.25)",
+                background: "#0d0d1a",
                 width: "100%",
-                aspectRatio: "1/1",
+                maxWidth: 460,
               }}
             >
-              <img
-                src="/logo.jpg"
-                alt="SkillPassport Logo"
+              {/* Media Header */}
+              <div
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
+                  background: "rgba(15,15,26,0.95)",
+                  padding: "12px 18px",
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
-              />
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#eab308" }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
+                  <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: "#818cf8", fontFamily: "monospace" }}>
+                    AI-VERIFICATION-LIVE-DEMO.mp4
+                  </span>
+                </div>
+                <span style={{ fontSize: 10, background: "rgba(16,185,129,0.2)", color: "#10b981", padding: "2px 8px", borderRadius: 99, fontWeight: 700 }}>
+                  LIVE
+                </span>
+              </div>
+
+              {/* Video Stream Element */}
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/10", overflow: "hidden" }}>
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    filter: "brightness(0.85) contrast(1.1)",
+                  }}
+                  src="https://cdn.pixabay.com/video/2021/04/12/70881-536545754_large.mp4"
+                />
+                
+                {/* Gradient Overlay with Logo & Badges */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(to top, rgba(13,13,26,0.95) 0%, transparent 60%)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    padding: 20,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", overflow: "hidden", border: "2px solid #6366f1" }}>
+                      <img src="/logo.jpg" alt="SkillPassport Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: "#ffffff" }}>SkillPassport Engine</div>
+                      <div style={{ fontSize: 11, color: "#a78bfa" }}>Autonomous Concept Licensing v2.4</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
 
