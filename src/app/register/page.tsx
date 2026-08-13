@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { signInWithGoogleFirebase } from "@/lib/firebase";
 
 export default function RegisterPage() {
@@ -12,24 +11,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Firebase Google Auth simulation states
-  const [showFirebase, setShowFirebase] = useState(false);
-  const [firebaseStep, setFirebaseStep] = useState<"select" | "loading" | "done">("select");
-  const [firebaseAccount, setFirebaseAccount] = useState<any>(null);
-
-  const GOOGLE_ACCOUNTS = [
-    {
-      name: "Arpitha Jain",
-      email: "arpithaammujain39@gmail.com",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arpitha",
-    },
-    {
-      name: "Alex Chen",
-      email: "alex.chen@gmail.com",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-    }
-  ];
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const update = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -64,104 +46,58 @@ export default function RegisterPage() {
     }
   }
 
-  async function triggerFirebaseSignIn() {
+  async function handleGoogleLogin() {
     setError("");
-    const res = await signInWithGoogleFirebase();
-    if (res.success && res.user) {
-      await handleGoogleLogin({
-        name: res.user.name,
-        email: res.user.email,
-        image: res.user.image,
-      });
-    } else {
-      // Fallback to interactive account selector modal
-      setShowFirebase(true);
-      setFirebaseStep("select");
-    }
-  }
-
-  async function handleGoogleLogin(account: typeof GOOGLE_ACCOUNTS[0]) {
-    setFirebaseAccount(account);
-    setFirebaseStep("loading");
+    setGoogleLoading(true);
 
     try {
+      const res = await signInWithGoogleFirebase();
+      if (!res.success || !res.user) {
+        setError(res.error || "Google Sign-In failed. Please try again.");
+        setGoogleLoading(false);
+        return;
+      }
+
+      const googleUser = res.user;
+
       // 1. Register user
       await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: account.name,
-          email: account.email,
+          name: googleUser.name,
+          email: googleUser.email,
           password: "google-oauth-secure-bypass-1234",
         }),
       });
 
       // 2. Authenticate
       const authRes = await signIn("credentials", {
-        email: account.email,
+        email: googleUser.email,
         password: "google-oauth-secure-bypass-1234",
         redirect: false,
       });
 
       if (authRes?.error) {
-        setError("Firebase authorization failed. Please try again.");
-        setShowFirebase(false);
+        setError("Sign up authorization failed.");
       } else {
-        // Update user image
+        // Sync profile picture
         await fetch("/api/profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            image: account.image,
+            image: googleUser.image,
             onboardingComplete: true,
           }),
         });
 
-        setFirebaseStep("done");
-        setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
-      }
-    } catch (err) {
-      setError("Firebase service connection error.");
-      setShowFirebase(false);
-    }
-  }
-
-  async function handleDemoRegister() {
-    const demoData = {
-      name: "Arpitha Jain C B",
-      email: "arpithaammujain39@gmail.com",
-      password: "password123",
-    };
-    setForm(demoData);
-    setLoading(true);
-    setError("");
-
-    try {
-      await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(demoData),
-      });
-
-      const res = await signIn("credentials", {
-        email: demoData.email,
-        password: demoData.password,
-        redirect: false,
-      });
-
-      if (!res?.error) {
         router.push("/dashboard");
         router.refresh();
-      } else {
-        setError("Demo registration failed");
       }
-    } catch {
-      setError("Error creating demo account");
+    } catch (err: any) {
+      setError("Firebase Google Sign-In error: " + (err?.message || "Connection failed"));
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   }
 
@@ -275,7 +211,7 @@ export default function RegisterPage() {
               type="submit"
               className="btn btn-primary"
               style={{ width: "100%", justifyContent: "center", padding: "12px 20px", borderRadius: 10 }}
-              disabled={loading}
+              disabled={loading || googleLoading}
             >
               {loading ? "Creating account…" : "🚀 Create SkillPassport"}
             </button>
@@ -292,7 +228,8 @@ export default function RegisterPage() {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={triggerFirebaseSignIn}
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
             style={{
               width: "100%",
               justifyContent: "center",
@@ -326,7 +263,7 @@ export default function RegisterPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.17-4.53z"
               />
             </svg>
-            Continue with Google (Firebase)
+            {googleLoading ? "Connecting to Google..." : "Continue with Google"}
           </button>
 
           <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--text-muted)" }}>
@@ -341,173 +278,6 @@ export default function RegisterPage() {
           </Link>
         </p>
       </div>
-
-      {/* ── FIREBASE OAUTH POPUP MODAL ── */}
-      <AnimatePresence>
-        {showFirebase && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 100,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(0, 0, 0, 0.75)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              style={{
-                width: "100%",
-                maxWidth: 380,
-                background: "#0d0d18",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 16,
-                overflow: "hidden",
-                boxShadow: "0 24px 70px rgba(0,0,0,0.8), 0 0 30px rgba(99,102,241,0.15)",
-              }}
-            >
-              {/* Firebase Header */}
-              <div
-                style={{
-                  background: "#121222",
-                  padding: "16px 20px",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <img
-                    src="https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/2x/firebase_28dp.png"
-                    alt="Firebase Logo"
-                    style={{ width: 20, height: 20 }}
-                  />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#ffca28", fontFamily: "sans-serif" }}>
-                    Firebase Auth
-                  </span>
-                </div>
-                <button
-                  onClick={() => setShowFirebase(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#9394a5",
-                    fontSize: 16,
-                    cursor: "pointer",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Firebase Auth Popup Body */}
-              <div style={{ padding: 24, textAlign: "center" }}>
-                {firebaseStep === "select" && (
-                  <div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: "#ffffff" }}>
-                      Sign in with Google
-                    </h3>
-                    <p style={{ fontSize: 12, color: "#9394a5", marginBottom: 20 }}>
-                      to continue to <strong style={{ color: "#ffffff" }}>SkillPassport</strong>
-                    </p>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
-                      {GOOGLE_ACCOUNTS.map((account) => (
-                        <div
-                          key={account.email}
-                          onClick={() => handleGoogleLogin(account)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 12,
-                            padding: 12,
-                            borderRadius: 10,
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.06)",
-                            cursor: "pointer",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                        >
-                          <img
-                            src={account.image}
-                            alt={account.name}
-                            style={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: "50%",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                            }}
-                          />
-                          <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "#ffffff" }}>{account.name}</div>
-                            <div style={{ fontSize: 11, color: "#9394a5" }}>{account.email}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {firebaseStep === "loading" && (
-                  <div style={{ padding: "20px 0" }}>
-                    <div
-                      className="animate-spin"
-                      style={{
-                        margin: "0 auto 20px",
-                        width: 36,
-                        height: 36,
-                        border: "3px solid rgba(255,255,255,0.1)",
-                        borderTopColor: "#ffca28",
-                        borderRadius: "50%",
-                      }}
-                    />
-                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#ffffff", marginBottom: 6 }}>
-                      Connecting to Google Account...
-                    </h3>
-                    <p style={{ fontSize: 12, color: "#9394a5" }}>
-                      Setting up OAuth session token for {firebaseAccount?.email}
-                    </p>
-                  </div>
-                )}
-
-                {firebaseStep === "done" && (
-                  <div style={{ padding: "20px 0" }}>
-                    <div
-                      style={{
-                        margin: "0 auto 16px",
-                        width: 42,
-                        height: 42,
-                        borderRadius: "50%",
-                        background: "rgba(16,185,129,0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "1px solid rgba(16,185,129,0.3)",
-                      }}
-                    >
-                      <span style={{ color: "#10b981", fontSize: 20, fontWeight: 800 }}>✓</span>
-                    </div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: "#ffffff", marginBottom: 6 }}>
-                      Authorized successfully!
-                    </h3>
-                    <p style={{ fontSize: 12, color: "#9394a5" }}>
-                      Welcome, {firebaseAccount?.name}! Redirecting to dashboard...
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

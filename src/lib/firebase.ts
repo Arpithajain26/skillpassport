@@ -27,7 +27,10 @@ export async function signInWithGoogleFirebase() {
       },
     };
   } catch (error: any) {
-    console.warn("Firebase popup authorization notice (fallback activated):", error?.message || error);
-    return { success: false, fallback: true, error: error?.message };
+    console.error("Firebase Google Auth Error:", error);
+    return {
+      success: false,
+      error: error?.message || "Google Sign-In failed or popup was closed.",
+    };
   }
 }
