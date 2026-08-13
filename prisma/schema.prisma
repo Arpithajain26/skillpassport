@@ -1,0 +1,374 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USER & AUTH
+// ============================================================
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  username      String?   @unique
+  bio           String?
+  location      String?
+  headline      String?
+  website       String?
+  linkedinUrl   String?
+  githubUsername String?
+  currentStatus String?   // student, graduate, professional, career_switcher
+  targetCountry String?
+  isPublic      Boolean   @default(true)
+  onboardingComplete Boolean @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  education     Education[]
+  experience    Experience[]
+  skills        UserSkill[]
+  evidence      Evidence[]
+  projects      Project[]
+  certificates  Certificate[]
+  careerGoals   CareerGoal[]
+  skillGaps     SkillGap[]
+  roadmaps      LearningRoadmap[]
+  assessments   Assessment[]
+  githubRepos   GitHubRepo[]
+  aiSummary     AiProfileSummary?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// EDUCATION & EXPERIENCE
+// ============================================================
+
+model Education {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  institution String
+  degree      String?
+  field       String?
+  startDate   DateTime?
+  endDate     DateTime?
+  grade       String?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("education")
+}
+
+model Experience {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  company     String
+  role        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  location    String?
+  skills      String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("experiences")
+}
+
+// ============================================================
+// SKILLS
+// ============================================================
+
+model Skill {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  category    String
+  description String?
+  icon        String?
+
+  userSkills UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @db.ObjectId
+  skillId            String?   @db.ObjectId
+  customSkillName    String?   // for skills not in the Skill catalog
+  proficiencyLevel   String    @default("Beginner") // Beginner, Elementary, Intermediate, Advanced, Expert
+  confidenceScore    Int       @default(0)  // 0-100
+  verificationStatus String    @default("unverified") // unverified, analyzed, verified
+  evidenceCount      Int       @default(0)
+  aiExplanation      String?
+  aiExplanationData  Json?     // structured explanation
+  endorsements       Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill? @relation(fields: [skillId], references: [id])
+
+  @@unique([userId, skillId])
+  @@map("user_skills")
+}
+
+// ============================================================
+// EVIDENCE
+// ============================================================
+
+model Evidence {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
+  type              String   // project, github_repository, certificate, coursework, internship, hackathon, coding_challenge, assessment, work_sample, simulation
+  title             String
+  description       String?
+  url               String?
+  fileUrl           String?
+  source            String?
+  technologies      String[]
+  verificationStatus String  @default("pending") // pending, analyzed, verified
+  aiScore           Int?
+  extractedSkills   Json?    // array of {name, level, confidence, explanation}
+  aiSummary         String?
+  aiRecommendations Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("evidence")
+}
+
+model Project {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  title       String
+  description String?
+  technologies String[]
+  githubUrl   String?
+  liveUrl     String?
+  imageUrl    String?
+  role        String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model Certificate {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String    @db.ObjectId
+  title        String
+  issuer       String
+  issueDate    DateTime?
+  expiryDate   DateTime?
+  credentialId String?
+  url          String?
+  imageUrl     String?
+  skills       String[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
+}
+
+// ============================================================
+// CAREER INTELLIGENCE
+// ============================================================
+
+model CareerGoal {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String    @db.ObjectId
+  targetRole       String
+  targetIndustry   String?
+  targetCountry    String?
+  requiredSkills   String[]
+  matchPercentage  Int?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roadmaps LearningRoadmap[]
+
+  @@map("career_goals")
+}
+
+model SkillGap {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @db.ObjectId
+  skill          String
+  currentLevel   String?
+  requiredLevel  String
+  gapScore       Int
+  priority       String   // Critical, High, Medium, Low
+  resources      String[]
+  targetRole     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("skill_gaps")
+}
+
+model LearningRoadmap {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
+  careerGoalId      String?  @db.ObjectId
+  title             String
+  overview          String?
+  steps             Json     // array of week objects
+  milestones        String[]
+  totalDurationWeeks Int     @default(12)
+  status            String   @default("active") // active, completed, paused
+  currentWeek       Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careerGoal  CareerGoal? @relation(fields: [careerGoalId], references: [id])
+
+  @@map("learning_roadmaps")
+}
+
+// ============================================================
+// ASSESSMENTS
+// ============================================================
+
+model Assessment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  skill       String
+  level       String
+  questions   Json      // array of question objects
+  userAnswers Json?     // array of answer indices
+  score       Int?      // 0-100
+  correct     Int?
+  total       Int?
+  levelAchieved String?
+  previousConfidence Int?
+  newConfidence      Int?
+  feedback    String?
+  questionFeedback Json?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("assessments")
+}
+
+// ============================================================
+// GITHUB
+// ============================================================
+
+model GitHubRepo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  repoId      Int      @unique
+  name        String
+  fullName    String
+  description String?
+  url         String
+  language    String?
+  languages   Json?    // {language: bytes}
+  stars       Int      @default(0)
+  forks       Int      @default(0)
+  isPrivate   Boolean  @default(false)
+  topics      String[]
+  extractedSkills Json? // skills detected
+  isApproved  Boolean  @default(false)
+  pushedAt    DateTime?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("github_repos")
+}
+
+// ============================================================
+// AI PROFILE SUMMARY
+// ============================================================
+
+model AiProfileSummary {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique @db.ObjectId
+  summary       String
+  headline      String?
+  keyStrengths  String[]
+  generatedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_profile_summaries")
+}
