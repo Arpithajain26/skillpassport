@@ -7,6 +7,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ShieldCheck } from "lucide-react";
 
+import { signInWithGoogleFirebase } from "@/lib/firebase";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,6 +33,22 @@ export default function LoginPage() {
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
     }
   ];
+
+  async function triggerFirebaseSignIn() {
+    setError("");
+    const res = await signInWithGoogleFirebase();
+    if (res.success && res.user) {
+      await handleGoogleLogin({
+        name: res.user.name,
+        email: res.user.email,
+        image: res.user.image,
+      });
+    } else {
+      // Fallback to interactive account selector modal
+      setShowFirebase(true);
+      setFirebaseStep("select");
+    }
+  }
 
   async function handleGoogleLogin(account: typeof GOOGLE_ACCOUNTS[0]) {
     setFirebaseAccount(account);
@@ -216,10 +234,7 @@ export default function LoginPage() {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => {
-              setShowFirebase(true);
-              setFirebaseStep("select");
-            }}
+            onClick={triggerFirebaseSignIn}
             style={{
               width: "100%",
               justifyContent: "center",
