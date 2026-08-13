@@ -9,13 +9,13 @@
   --bg-card-hover: #191928;
   --bg-glass: rgba(255, 255, 255, 0.04);
   --border: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.6);
+  --border-focus: rgba(139, 92, 246, 0.6);
 
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-glow: rgba(99, 102, 241, 0.3);
-  --violet: #8b5cf6;
-  --cyan: #22d3ee;
+  --primary: #8b5cf6;
+  --primary-light: #a78bfa;
+  --primary-glow: rgba(139, 92, 246, 0.4);
+  --violet: #a855f7;
+  --cyan: #06b6d4;
   --emerald: #10b981;
   --amber: #f59e0b;
   --rose: #f43f5e;
@@ -48,21 +48,21 @@ body {
 /* ─── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-surface); }
-::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.7); }
+::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.7); }
 
 /* ─── Gradients ──────────────────────────────────────────────────── */
 .gradient-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #06b6d4 100%);
 }
 .gradient-text {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #67e8f9 100%);
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #22d3ee 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-glow {
-  background: radial-gradient(ellipse at center, rgba(99,102,241,0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
 }
 
 /* ─── Glass Card ─────────────────────────────────────────────────── */
@@ -100,13 +100,13 @@ body {
   white-space: nowrap;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
   color: #fff;
   box-shadow: 0 0 0 0 var(--primary-glow);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(99,102,241,0.45);
+  box-shadow: 0 8px 24px rgba(168,85,247,0.45);
 }
 .btn-primary:active { transform: translateY(0); }
 .btn-secondary {
