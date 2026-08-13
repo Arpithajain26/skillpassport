@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, Search, Star, Award, CheckCircle2, AlertTriangle, ArrowRight, BookOpen } from "lucide-react";
@@ -33,14 +33,21 @@ export function CareerClient({
   skillGaps: any[];
 }) {
   const router = useRouter();
-  const [_, startTransition] = useTransition();
-  const [targetRole, setTargetRole] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const initialRole = careerGoals[0]?.targetRole || "Full Stack Developer";
+  const [targetRole, setTargetRole] = useState(initialRole);
   const [customRole, setCustomRole] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const finalRole = customRole.trim() || targetRole;
+
+  useEffect(() => {
+    if (finalRole && !results) {
+      analyzeGap();
+    }
+  }, []);
 
   async function analyzeGap() {
     if (!finalRole) {

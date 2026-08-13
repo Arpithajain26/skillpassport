@@ -130,6 +130,29 @@ export default function RegisterPage() {
       />
 
       <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+        {/* Back to Home Button */}
+        <div style={{ marginBottom: 20 }}>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              padding: "6px 14px",
+              borderRadius: 99,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              transition: "all 0.2s",
+            }}
+          >
+            ← Back to Home
+          </Link>
+        </div>
+
         {/* Header / Logo */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
