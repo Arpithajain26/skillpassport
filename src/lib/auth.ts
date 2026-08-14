@@ -13,7 +13,10 @@ type FirebaseLookupResponse = {
 };
 
 async function verifyFirebaseToken(idToken: string) {
-  const apiKey = process.env.FIREBASE_WEB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  // Firebase web API keys are intentionally public identifiers. Keep this
+  // fallback in sync with the browser Firebase configuration so token
+  // verification also works when Vercel environment variables are absent.
+  const apiKey = process.env.FIREBASE_WEB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCloSzqVIVIXl6YKQyAGG0yQ_nY4DG7TXY";
   if (!apiKey) return null;
 
   const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
