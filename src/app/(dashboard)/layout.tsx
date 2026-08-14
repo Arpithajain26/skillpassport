@@ -19,24 +19,24 @@ export default async function DashboardLayout({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  let userName = session.user.name ?? "User";
-  let userUsername: string | undefined = (session.user as any).username;
-  let userImage: string | undefined = session.user.image ?? undefined;
-
+  let dbUser;
   try {
-    const dbUser = await prisma.user.findUnique({
+    dbUser = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { name: true, username: true, image: true },
     });
 
-    if (dbUser) {
-      userName = dbUser.name ?? userName;
-      userUsername = dbUser.username || userUsername;
-      userImage = dbUser.image || userImage;
-    }
   } catch (error) {
-    console.warn("Dashboard layout: DB fetch failed, using session data", error);
+    console.error("Dashboard layout: unable to validate session user", error);
+    redirect("/login");
   }
+
+  // A signed cookie alone is not enough: it must point to a real account.
+  if (!dbUser) redirect("/login");
+
+  const userName = dbUser.name ?? session.user.name ?? "User";
+  const userUsername = dbUser.username || (session.user as any).username;
+  const userImage = dbUser.image || session.user.image || undefined;
 
   const initials = userName
     .split(" ")

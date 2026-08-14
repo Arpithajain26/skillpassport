@@ -57,19 +57,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
           }
         } catch (dbError) {
-          console.warn("DB connection error in authorize, using session fallback:", dbError);
+          // Never authenticate a user when the identity store is unavailable.
+          console.error("Unable to verify credentials:", dbError);
         }
 
-        // Fallback for demo/unreachable DB environments
-        const namePart = emailStr.split("@")[0] || "User";
-        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        return {
-          id: "usr-" + emailStr.replace(/[^a-z0-9]/gi, "-"),
-          email: emailStr,
-          name: displayName,
-          username: namePart.toLowerCase(),
-          onboardingComplete: true,
-        };
+        return null;
       },
     }),
   ],

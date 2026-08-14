@@ -49,18 +49,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (dbError) {
-    console.warn("Database connection issue during registration, returning fallback user session:", dbError);
-    // Graceful fallback for deployments with pending DB environment setup
+    console.error("Unable to create account:", dbError);
     return NextResponse.json(
-      {
-        user: {
-          id: "usr-" + Date.now().toString(36),
-          email,
-          name,
-          username,
-        },
-      },
-      { status: 201 }
+      { error: "We could not create your account right now. Please try again shortly." },
+      { status: 503 }
     );
   }
 }
