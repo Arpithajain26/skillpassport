@@ -32,26 +32,15 @@ export default function LoginPage() {
 
       const googleUser = res.user;
 
-      // 1. Register user if not existing
-      await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: googleUser.name,
-          email: googleUser.email,
-          password: "google-oauth-secure-bypass-1234",
-        }),
-      });
-
-      // 2. Authenticate
+      // The server verifies the Firebase ID token and creates the account if needed.
       const authRes = await signIn("credentials", {
         email: googleUser.email,
-        password: "google-oauth-secure-bypass-1234",
+        firebaseToken: googleUser.idToken,
         redirect: false,
       });
 
       if (authRes?.error) {
-        setError("Sign in authorization failed.");
+        setError("Google sign-in could not be verified. Please try again.");
       } else {
         // Sync profile picture
         await fetch("/api/profile", {

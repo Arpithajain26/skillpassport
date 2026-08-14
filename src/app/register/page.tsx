@@ -36,8 +36,12 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
-      // Auto sign in
-      await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+      // Only continue once the newly-created account is authenticated.
+      const authResult = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+      if (authResult?.error) {
+        setError("Your account was created, but sign-in failed. Please sign in with your new password.");
+        return;
+      }
       router.push("/onboarding");
       router.refresh();
     } catch {
@@ -64,26 +68,15 @@ export default function RegisterPage() {
 
       const googleUser = res.user;
 
-      // 1. Register user
-      await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: googleUser.name,
-          email: googleUser.email,
-          password: "google-oauth-secure-bypass-1234",
-        }),
-      });
-
-      // 2. Authenticate
+      // The server verifies the Firebase ID token and creates the account if needed.
       const authRes = await signIn("credentials", {
         email: googleUser.email,
-        password: "google-oauth-secure-bypass-1234",
+        firebaseToken: googleUser.idToken,
         redirect: false,
       });
 
       if (authRes?.error) {
-        setError("Sign up authorization failed.");
+        setError("Google sign-up could not be verified. Please try again.");
       } else {
         // Sync profile picture
         await fetch("/api/profile", {

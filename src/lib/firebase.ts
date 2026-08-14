@@ -24,6 +24,7 @@ export async function signInWithGoogleFirebase() {
         name: user.displayName || "Google User",
         email: user.email || "",
         image: user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`,
+        idToken: await user.getIdToken(),
       },
     };
   } catch (error: any) {
