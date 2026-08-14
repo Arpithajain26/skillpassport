@@ -4,22 +4,39 @@ import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { SkillsClient } from "./client";
 
+const isValidUserId = (id: string) => !!id && id.length > 0;
+
 export const metadata = { title: "Skills" };
 
 export default async function SkillsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [userSkills, catalog] = await Promise.all([
-    prisma.userSkill.findMany({
-      where: { userId: session.user.id },
-      include: { skill: true },
-      orderBy: { confidenceScore: "desc" },
-    }),
-    prisma.skill.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] }),
-  ]);
+  let userSkills: any[] = [];
+  let catalog: any[] = [];
+  if (isValidUserId(session.user.id)) {
+    try {
+      [userSkills, catalog] = await Promise.all([
+        prisma.userSkill.findMany({
+          where: { userId: session.user.id },
+          include: { skill: true },
+          orderBy: { confidenceScore: "desc" },
+        }),
+        prisma.skill.findMany({
+          orderBy: [{ category: "asc" }, { name: "asc" }],
+        }),
+      ]);
+    } catch (e) {
+      console.warn("Skills fetch notice:", e);
+    }
+  }
 
-  const initials = (session.user.name ?? "?").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+  const initials = (session.user.name ?? "?")
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <div>

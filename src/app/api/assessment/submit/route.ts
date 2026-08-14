@@ -5,7 +5,8 @@ import { aiClient } from "@/lib/ai-client";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const { assessmentId, userAnswers } = await req.json();
@@ -14,7 +15,11 @@ export async function POST(req: NextRequest) {
       where: { id: assessmentId, userId: session.user.id },
     });
 
-    if (!assessment) return NextResponse.json({ error: "Assessment not found" }, { status: 404 });
+    if (!assessment)
+      return NextResponse.json(
+        { error: "Assessment not found" },
+        { status: 404 },
+      );
 
     // Get current confidence
     const userSkill = await prisma.userSkill.findFirst({
@@ -22,12 +27,12 @@ export async function POST(req: NextRequest) {
       include: { skill: true },
     });
 
-    const result = await aiClient.submitAssessment({
+    const result = (await aiClient.submitAssessment({
       skill: assessment.skill,
       questions: assessment.questions,
       user_answers: userAnswers,
       current_confidence: userSkill?.confidenceScore ?? 50,
-    }) as any;
+    })) as any;
 
     // Update assessment record
     await prisma.assessment.update({
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     // Update skill confidence
     const catalogSkill = await prisma.skill.findFirst({
-      where: { name: { equals: assessment.skill, mode: "insensitive" } },
+      where: { name: assessment.skill },
     });
 
     if (catalogSkill) {
@@ -61,6 +66,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Assessment submit error:", error);
-    return NextResponse.json({ error: "Failed to submit assessment" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to submit assessment" },
+      { status: 500 },
+    );
   }
 }

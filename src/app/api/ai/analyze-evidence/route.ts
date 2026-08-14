@@ -5,13 +5,14 @@ import { aiClient } from "@/lib/ai-client";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const body = await req.json();
     const { evidenceId, ...analysisData } = body;
 
-    const result = await aiClient.analyzeEvidence(analysisData) as any;
+    const result = (await aiClient.analyzeEvidence(analysisData)) as any;
 
     // Update evidence record if evidenceId provided
     if (evidenceId) {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       // Update user skill confidence scores based on AI analysis
       for (const extractedSkill of result.skills) {
         const catalogSkill = await prisma.skill.findFirst({
-          where: { name: { equals: extractedSkill.name, mode: "insensitive" } },
+          where: { name: extractedSkill.name },
         });
 
         if (catalogSkill) {
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
 
           if (existing) {
             const newConfidence = Math.round(
-              existing.confidenceScore * 0.7 + extractedSkill.confidence * 0.3
+              existing.confidenceScore * 0.7 + extractedSkill.confidence * 0.3,
             );
             await prisma.userSkill.update({
               where: { id: existing.id },
@@ -69,6 +70,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("AI analyze evidence error:", error);
-    return NextResponse.json({ error: "AI service unavailable" }, { status: 503 });
+    return NextResponse.json(
+      { error: "AI service unavailable" },
+      { status: 503 },
+    );
   }
 }

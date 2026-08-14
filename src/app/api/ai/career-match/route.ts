@@ -3,11 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { aiClient } from "@/lib/ai-client";
 
-const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+const isValidUserId = (id: string) => !!id && id.length > 0;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const userId = session.user.id;
@@ -17,10 +18,13 @@ export async function POST(req: NextRequest) {
     let userSkills: any[] = [];
     let evidenceCount = 0;
 
-    if (isValidObjectId(userId)) {
+    if (isValidUserId(userId)) {
       try {
         [userSkills, evidenceCount] = await Promise.all([
-          prisma.userSkill.findMany({ where: { userId }, include: { skill: true } }),
+          prisma.userSkill.findMany({
+            where: { userId },
+            include: { skill: true },
+          }),
           prisma.evidence.count({ where: { userId } }),
         ]);
       } catch (dbErr) {
@@ -40,7 +44,7 @@ export async function POST(req: NextRequest) {
       evidence_count: evidenceCount,
     })) as any;
 
-    if (isValidObjectId(userId)) {
+    if (isValidUserId(userId)) {
       try {
         await prisma.careerGoal.updateMany({
           where: { userId, targetRole },
@@ -59,8 +63,12 @@ export async function POST(req: NextRequest) {
       matching_skills: ["React", "Python", "REST API", "Git"],
       missing_skills: ["Docker", "Kubernetes", "GraphQL"],
       partial_skills: ["SQL"],
-      assessment: "Strong candidate profile with solid frontend and API experience.",
-      next_steps: ["Build containerized Docker project", "Complete TypeScript technical assessment"],
+      assessment:
+        "Strong candidate profile with solid frontend and API experience.",
+      next_steps: [
+        "Build containerized Docker project",
+        "Complete TypeScript technical assessment",
+      ],
     });
   }
 }

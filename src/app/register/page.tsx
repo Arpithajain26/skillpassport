@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { signInWithGoogleFirebase } from "@/lib/firebase";
+import {
+  signInWithGoogleFirebase,
+  signInWithGoogleRedirect,
+  handleAuthRedirect,
+} from "@/lib/firebase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,6 +19,122 @@ export default function RegisterPage() {
 
   const update = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Check if returning from Firebase redirect
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const redirectResult = await handleAuthRedirect();
+        if (redirectResult?.success && redirectResult.user) {
+          const googleUser = redirectResult.user;
+
+          const authRes = await signIn("credentials", {
+            email: googleUser.email,
+            firebaseToken: googleUser.idToken,
+            redirect: false,
+          });
+
+          if (authRes?.error) {
+            console.error("NextAuth sign-in error:", authRes.error);
+            setError("Google sign-up could not be verified. Please try again.");
+          } else {
+            try {
+              await fetch("/api/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  image: googleUser.image,
+                  onboardingComplete: true,
+                }),
+              });
+            } catch (profileErr) {
+              console.warn("Profile sync failed:", profileErr);
+            }
+
+            router.push("/dashboard");
+            router.refresh();
+          }
+        }
+      } catch (err) {
+        console.warn("Redirect result check:", err);
+      }
+    };
+
+    checkRedirectResult();
+  }, [router]);
+
+  async function handleGoogleLogin() {
+    setError("");
+    setGoogleLoading(true);
+
+    try {
+      // Try redirect flow first (more reliable, won't be blocked by popups)
+      await signInWithGoogleRedirect();
+      // Note: this will redirect away from the page, return handled in useEffect above
+    } catch (redirectErr: any) {
+      console.warn(
+        "Redirect flow failed, trying popup fallback:",
+        redirectErr?.message,
+      );
+
+      // Fallback to popup if redirect fails
+      try {
+        const res = await signInWithGoogleFirebase();
+        if (!res.success || !res.user) {
+          let msg = res.error || "Google Sign-In failed.";
+          if (msg.includes("unauthorized-domain")) {
+            msg =
+              "Domain unauthorized in Firebase. Please add your Vercel URL in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+          } else if (
+            msg.includes("popup-closed") ||
+            msg.includes("popup-blocked")
+          ) {
+            msg =
+              "Sign-up popup was blocked. Your browser may be blocking popups. Try disabling your popup blocker or using an incognito window.";
+          }
+          setError(msg);
+          setGoogleLoading(false);
+          return;
+        }
+
+        const googleUser = res.user;
+
+        const authRes = await signIn("credentials", {
+          email: googleUser.email,
+          firebaseToken: googleUser.idToken,
+          redirect: false,
+        });
+
+        if (authRes?.error) {
+          console.error("NextAuth sign-in error:", authRes.error);
+          setError("Google sign-up could not be verified. Please try again.");
+          setGoogleLoading(false);
+        } else {
+          try {
+            await fetch("/api/profile", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                image: googleUser.image,
+                onboardingComplete: true,
+              }),
+            });
+          } catch (profileErr) {
+            console.warn("Profile sync failed:", profileErr);
+          }
+
+          router.push("/dashboard");
+          router.refresh();
+        }
+      } catch (err: any) {
+        console.error("Popup fallback error:", err);
+        setError(
+          "Google Sign-In failed. Please try again or use email/password.",
+        );
+        setGoogleLoading(false);
+      }
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,9 +157,15 @@ export default function RegisterPage() {
         return;
       }
       // Only continue once the newly-created account is authenticated.
-      const authResult = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+      const authResult = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
       if (authResult?.error) {
-        setError("Your account was created, but sign-in failed. Please sign in with your new password.");
+        setError(
+          "Your account was created, but sign-in failed. Please sign in with your new password.",
+        );
         return;
       }
       router.push("/onboarding");
@@ -47,54 +173,6 @@ export default function RegisterPage() {
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
-    }
-  }
-
-  async function handleGoogleLogin() {
-    setError("");
-    setGoogleLoading(true);
-
-    try {
-      const res = await signInWithGoogleFirebase();
-      if (!res.success || !res.user) {
-        let msg = res.error || "Google Sign-In failed.";
-        if (msg.includes("unauthorized-domain")) {
-          msg = "Domain unauthorized in Firebase. Please add your Vercel URL in Firebase Console -> Authentication -> Settings -> Authorized domains.";
-        }
-        setError(msg);
-        setGoogleLoading(false);
-        return;
-      }
-
-      const googleUser = res.user;
-
-      // The server verifies the Firebase ID token and creates the account if needed.
-      const authRes = await signIn("credentials", {
-        email: googleUser.email,
-        firebaseToken: googleUser.idToken,
-        redirect: false,
-      });
-
-      if (authRes?.error) {
-        setError("Google sign-up could not be verified. Please try again.");
-      } else {
-        // Sync profile picture
-        await fetch("/api/profile", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image: googleUser.image,
-            onboardingComplete: true,
-          }),
-        });
-
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } catch (err: any) {
-      setError("Firebase Google Sign-In error: " + (err?.message || "Connection failed"));
-    } finally {
-      setGoogleLoading(false);
     }
   }
 
@@ -118,7 +196,8 @@ export default function RegisterPage() {
           position: "fixed",
           inset: 0,
           pointerEvents: "none",
-          background: "radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(99,102,241,0.08) 0%, transparent 60%)",
+          background:
+            "radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(99,102,241,0.08) 0%, transparent 60%)",
         }}
       />
 
@@ -148,7 +227,15 @@ export default function RegisterPage() {
 
         {/* Header / Logo */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              textDecoration: "none",
+            }}
+          >
             <div
               style={{
                 width: 36,
@@ -161,13 +248,33 @@ export default function RegisterPage() {
                 justifyContent: "center",
               }}
             >
-              <img src="/logo.jpg" alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img
+                src="/logo.jpg"
+                alt="Logo"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
             <span style={{ fontWeight: 800, fontSize: 20, color: "#ffffff" }}>
-              Skill<span style={{ background: "linear-gradient(135deg, #818cf8, #22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Passport</span>
+              Skill
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #818cf8, #22d3ee)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Passport
+              </span>
             </span>
           </Link>
-          <h1 style={{ fontSize: 26, fontWeight: 800, marginTop: 28, marginBottom: 8 }}>
+          <h1
+            style={{
+              fontSize: 26,
+              fontWeight: 800,
+              marginTop: 28,
+              marginBottom: 8,
+            }}
+          >
             Create your passport
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
@@ -175,16 +282,29 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="card" style={{ padding: 32, background: "rgba(19,19,31,0.85)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+        <div
+          className="card"
+          style={{
+            padding: 32,
+            background: "rgba(19,19,31,0.85)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
           {error && (
             <div className="alert alert-error" style={{ marginBottom: 20 }}>
               <span>⚠</span> {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", gap: 20 }}
+          >
             <div className="input-group">
-              <label className="input-label" htmlFor="reg-name">Full name</label>
+              <label className="input-label" htmlFor="reg-name">
+                Full name
+              </label>
               <input
                 id="reg-name"
                 type="text"
@@ -198,7 +318,9 @@ export default function RegisterPage() {
             </div>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="reg-email">Email address</label>
+              <label className="input-label" htmlFor="reg-email">
+                Email address
+              </label>
               <input
                 id="reg-email"
                 type="email"
@@ -212,7 +334,9 @@ export default function RegisterPage() {
             </div>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="reg-password">Password</label>
+              <label className="input-label" htmlFor="reg-password">
+                Password
+              </label>
               <input
                 id="reg-password"
                 type="password"
@@ -230,7 +354,12 @@ export default function RegisterPage() {
               id="register-submit"
               type="submit"
               className="btn btn-primary"
-              style={{ width: "100%", justifyContent: "center", padding: "12px 20px", borderRadius: 10 }}
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                padding: "12px 20px",
+                borderRadius: 10,
+              }}
               disabled={loading || googleLoading}
             >
               {loading ? "Creating account…" : "🚀 Create SkillPassport"}
@@ -238,10 +367,33 @@ export default function RegisterPage() {
           </form>
 
           {/* Social Divider */}
-          <div style={{ display: "flex", alignItems: "center", margin: "20px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-            <span style={{ padding: "0 10px", fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase" }}>or</span>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+          <div
+            style={{ display: "flex", alignItems: "center", margin: "20px 0" }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "rgba(255,255,255,0.08)",
+              }}
+            />
+            <span
+              style={{
+                padding: "0 10px",
+                fontSize: 12,
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+              }}
+            >
+              or
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "rgba(255,255,255,0.08)",
+              }}
+            />
           </div>
 
           {/* Continue with Google (Firebase) */}
@@ -286,14 +438,31 @@ export default function RegisterPage() {
             {googleLoading ? "Connecting to Google..." : "Continue with Google"}
           </button>
 
-          <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--text-muted)" }}>
+          <p
+            style={{
+              textAlign: "center",
+              marginTop: 20,
+              fontSize: 12,
+              color: "var(--text-muted)",
+            }}
+          >
             By registering you agree to our Terms of Service and Privacy Policy.
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: "var(--text-secondary)" }}>
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: 24,
+            fontSize: 14,
+            color: "var(--text-secondary)",
+          }}
+        >
           Already have an account?{" "}
-          <Link href="/login" style={{ color: "var(--primary-light)", fontWeight: 600 }}>
+          <Link
+            href="/login"
+            style={{ color: "var(--primary-light)", fontWeight: 600 }}
+          >
             Sign in
           </Link>
         </p>

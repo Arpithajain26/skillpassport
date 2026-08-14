@@ -8,22 +8,102 @@ export const metadata = { title: "Dashboard" };
 
 async function getDashboardData(userId: string) {
   try {
-    const [user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId } }),
-      prisma.userSkill.findMany({ where: { userId }, include: { skill: true }, orderBy: { confidenceScore: "desc" }, take: 8 }),
-      prisma.evidence.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 5 }),
-      prisma.project.count({ where: { userId } }),
-      prisma.certificate.count({ where: { userId } }),
-      prisma.careerGoal.findMany({ where: { userId, isActive: true }, take: 2 }),
-      prisma.skillGap.findMany({ where: { userId }, orderBy: { gapScore: "desc" }, take: 5 }),
-      prisma.assessment.findMany({ where: { userId }, orderBy: { completedAt: "desc" }, take: 3 }),
-      prisma.aiProfileSummary.findUnique({ where: { userId } }),
-      prisma.gitHubRepo.count({ where: { userId } }),
-    ]);
+    // Fetch user first
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    return { user, skills, evidence, projects, certificates, careerGoals, skillGaps, assessments, aiSummary, githubRepos };
+    // Only fetch related data if queries exist - with error handling for each
+    let skills: any[] = [];
+    let evidence: any[] = [];
+    let projects = 0;
+    let certificates = 0;
+    let careerGoals: any[] = [];
+    let skillGaps: any[] = [];
+    let assessments: any[] = [];
+    let aiSummary: any = null;
+    let githubRepos = 0;
+
+    try {
+      skills = await prisma.userSkill.findMany({
+        where: { userId },
+        include: { skill: true },
+        orderBy: { confidenceScore: "desc" },
+        take: 8,
+      });
+    } catch (e) {
+      console.log("Skip skills:", e);
+    }
+    try {
+      evidence = await prisma.evidence.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      });
+    } catch (e) {
+      console.log("Skip evidence:", e);
+    }
+    try {
+      projects = await prisma.project.count({ where: { userId } });
+    } catch (e) {
+      console.log("Skip projects:", e);
+    }
+    try {
+      certificates = await prisma.certificate.count({ where: { userId } });
+    } catch (e) {
+      console.log("Skip certificates:", e);
+    }
+    try {
+      careerGoals = await prisma.careerGoal.findMany({
+        where: { userId, isActive: true },
+        take: 2,
+      });
+    } catch (e) {
+      console.log("Skip careerGoals:", e);
+    }
+    try {
+      skillGaps = await prisma.skillGap.findMany({
+        where: { userId },
+        orderBy: { gapScore: "desc" },
+        take: 5,
+      });
+    } catch (e) {
+      console.log("Skip skillGaps:", e);
+    }
+    try {
+      assessments = await prisma.assessment.findMany({
+        where: { userId },
+        orderBy: { completedAt: "desc" },
+        take: 3,
+      });
+    } catch (e) {
+      console.log("Skip assessments:", e);
+    }
+    try {
+      aiSummary = await prisma.aiProfileSummary.findUnique({
+        where: { userId },
+      });
+    } catch (e) {
+      console.log("Skip aiSummary:", e);
+    }
+    try {
+      githubRepos = await prisma.gitHubRepo.count({ where: { userId } });
+    } catch (e) {
+      console.log("Skip githubRepos:", e);
+    }
+
+    return {
+      user,
+      skills,
+      evidence,
+      projects,
+      certificates,
+      careerGoals,
+      skillGaps,
+      assessments,
+      aiSummary,
+      githubRepos,
+    };
   } catch (error) {
-    console.error("Dashboard fetch notice:", error);
+    console.error("Dashboard fetch error:", error);
     return {
       user: null,
       skills: [],
@@ -41,39 +121,40 @@ async function getDashboardData(userId: string) {
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) {
+    console.log("No session, redirecting to login");
+    redirect("/login");
+  }
+
+  const isValidMongoId = (value: string) => /^[0-9a-fA-F]{24}$/.test(value);
+  if (!isValidMongoId(session.user.id)) {
+    console.warn("Blocked invalid session user id:", session.user.id);
+    redirect("/login");
+  }
 
   const data = await getDashboardData(session.user.id);
-  if (data.user && data.user.onboardingComplete === false) {
+
+  if (!data.user) {
+    console.log("User not found in database, redirecting to onboarding");
     redirect("/onboarding");
   }
 
-  const effectiveData = {
-    ...data,
-    user: data.user || {
-      id: session.user.id,
-      name: session.user.name || "Developer",
-      email: session.user.email,
-      image: session.user.image,
-      onboardingComplete: true,
-    },
-    skills: data.skills.length > 0 ? data.skills : [
-      { id: "sk-1", confidenceScore: 88, proficiencyLevel: "Advanced", customSkillName: "React / Next.js", skill: { name: "React" } },
-      { id: "sk-2", confidenceScore: 82, proficiencyLevel: "Advanced", customSkillName: "Python / FastAPI", skill: { name: "Python" } },
-      { id: "sk-3", confidenceScore: 75, proficiencyLevel: "Intermediate", customSkillName: "PostgreSQL & Mongo", skill: { name: "PostgreSQL" } },
-      { id: "sk-4", confidenceScore: 70, proficiencyLevel: "Intermediate", customSkillName: "Docker & Cloud", skill: { name: "Docker" } },
-    ],
-    careerGoals: data.careerGoals.length > 0 ? data.careerGoals : [
-      { id: "cg-1", targetRole: "Full Stack Developer", targetIndustry: "Technology / SaaS", isActive: true }
-    ],
-  };
+  if (data.user.onboardingComplete === false) {
+    console.log("Onboarding not complete, redirecting");
+    redirect("/onboarding");
+  }
 
-  const initials = (effectiveData.user.name ?? "?")
+  const initials = (data.user.name ?? "?")
     .split(" ")
     .map((n: string) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const effectiveData = {
+    ...data,
+    user: data.user,
+  };
 
   return (
     <div>

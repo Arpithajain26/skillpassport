@@ -19,13 +19,18 @@ export default async function DashboardLayout({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
+  const isValidUserId = (value: string) => !!value && value.length > 0;
+  if (!isValidUserId(session.user.id)) {
+    console.warn("Blocked invalid session user id:", session.user.id);
+    redirect("/login");
+  }
+
   let dbUser;
   try {
     dbUser = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { name: true, username: true, image: true },
     });
-
   } catch (error) {
     console.error("Dashboard layout: unable to validate session user", error);
     redirect("/login");
@@ -53,9 +58,7 @@ export default async function DashboardLayout({
         image={userImage}
         initials={initials}
       />
-      <div className="dashboard-container">
-        {children}
-      </div>
+      <div className="dashboard-container">{children}</div>
     </div>
   );
 }

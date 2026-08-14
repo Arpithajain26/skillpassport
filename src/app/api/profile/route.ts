@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+const isValidUserId = (id: string) => !!id && id.length > 0;
 
 const profileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -28,7 +28,7 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  if (!isValidObjectId(userId)) {
+  if (!isValidUserId(userId)) {
     return NextResponse.json({
       id: userId,
       name: session.user.name ?? "User",
@@ -95,7 +95,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const data = profileSchema.parse(body);
 
-    if (!isValidObjectId(userId)) {
+    if (!isValidUserId(userId)) {
       return NextResponse.json({
         id: userId,
         name: data.name ?? session.user.name ?? "User",
@@ -107,13 +107,24 @@ export async function PUT(req: NextRequest) {
     const user = await prisma.user.update({
       where: { id: userId },
       data,
-      select: { id: true, name: true, email: true, bio: true, location: true, headline: true, image: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        location: true,
+        headline: true,
+        image: true,
+      },
     });
 
     return NextResponse.json(user);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues[0]?.message || "Invalid payload" }, { status: 400 });
+      return NextResponse.json(
+        { error: error.issues[0]?.message || "Invalid payload" },
+        { status: 400 },
+      );
     }
     return NextResponse.json({
       id: userId,

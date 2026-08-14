@@ -3,11 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { aiClient } from "@/lib/ai-client";
 
-const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+const isValidUserId = (id: string) => !!id && id.length > 0;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const userId = session.user.id;
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
     const targetRole = body.targetRole || "Full Stack Developer";
 
     let userSkills: any[] = [];
-    if (isValidObjectId(userId)) {
+    if (isValidUserId(userId)) {
       try {
         userSkills = await prisma.userSkill.findMany({
           where: { userId },
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       target_role: targetRole,
     })) as any;
 
-    if (isValidObjectId(userId) && result?.gaps?.length > 0) {
+    if (isValidUserId(userId) && result?.gaps?.length > 0) {
       try {
         await prisma.skillGap.deleteMany({ where: { userId, targetRole } });
         await prisma.skillGap.createMany({
@@ -62,12 +63,34 @@ export async function POST(req: NextRequest) {
     console.warn("Skill gap processing notice:", error);
     return NextResponse.json({
       gaps: [
-        { skill: "TypeScript Generics", current_level: "Intermediate", required_level: "Advanced", gap_score: 75, priority: "High", resources: ["Official TS Docs", "Clean Code Patterns"] },
-        { skill: "System Architecture", current_level: "Beginner", required_level: "Intermediate", gap_score: 60, priority: "Critical", resources: ["Microservices Handbook", "System Design Primer"] },
-        { skill: "CI/CD & Docker", current_level: "Beginner", required_level: "Intermediate", gap_score: 40, priority: "Medium", resources: ["Docker Guide", "GitHub Actions Tutorial"] },
+        {
+          skill: "TypeScript Generics",
+          current_level: "Intermediate",
+          required_level: "Advanced",
+          gap_score: 75,
+          priority: "High",
+          resources: ["Official TS Docs", "Clean Code Patterns"],
+        },
+        {
+          skill: "System Architecture",
+          current_level: "Beginner",
+          required_level: "Intermediate",
+          gap_score: 60,
+          priority: "Critical",
+          resources: ["Microservices Handbook", "System Design Primer"],
+        },
+        {
+          skill: "CI/CD & Docker",
+          current_level: "Beginner",
+          required_level: "Intermediate",
+          gap_score: 40,
+          priority: "Medium",
+          resources: ["Docker Guide", "GitHub Actions Tutorial"],
+        },
       ],
       match_percentage: 78,
-      analysis_summary: "Strong core foundation. Bridge critical gaps in System Architecture and CI/CD for full readiness.",
+      analysis_summary:
+        "Strong core foundation. Bridge critical gaps in System Architecture and CI/CD for full readiness.",
       top_strengths: ["React / Next.js", "Python / FastAPI", "REST APIs"],
       critical_gaps: ["System Architecture"],
     });
